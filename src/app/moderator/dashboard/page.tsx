@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import Navbar from '../../components/Navbar';
 
 export const metadata: Metadata = {
   title: 'Moderator Dashboard | ExamVal',
@@ -8,19 +9,7 @@ export const metadata: Metadata = {
 export default function ModeratorDashboardPage() {
   return (
     <div id="moderator-dashboard-root" className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <span className="text-xl font-bold tracking-tight text-indigo-400">ExamVal</span>
-          <span className="text-slate-500">/</span>
-          <span className="text-sm font-medium text-slate-400">Moderator Dashboard</span>
-        </div>
-        <div className="flex items-center space-x-4">
-          <span className="text-xs px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-semibold">
-            Role: Moderator
-          </span>
-        </div>
-      </header>
+      <Navbar currentPaperId={null} />
 
       {/* Main Content Area */}
       <main className="flex-1 p-8 space-y-8 max-w-7xl mx-auto w-full">

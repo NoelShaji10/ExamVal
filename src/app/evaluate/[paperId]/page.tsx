@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import Navbar from '../../components/Navbar';
 
 export const metadata: Metadata = {
   title: 'Evaluator Workspace | ExamVal',
@@ -16,20 +17,7 @@ export default function EvaluatePage({ params }: PageProps) {
 
   return (
     <div id="evaluator-workspace-root" className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Navigation Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <span className="text-xl font-bold tracking-tight text-indigo-400">ExamVal</span>
-          <span className="text-slate-500">/</span>
-          <span className="text-sm font-medium text-slate-400">Evaluator Workspace</span>
-        </div>
-        <div className="flex items-center space-x-4">
-          <div className="text-right">
-            <p className="text-xs text-slate-400 font-mono">Paper ID: {paperId}</p>
-            <p className="text-xs text-indigo-400 font-semibold">Role: Evaluator (E1/E2)</p>
-          </div>
-        </div>
-      </header>
+      <Navbar currentPaperId={paperId} />
 
       {/* Main Split-Screen Workspace */}
       <main className="flex-1 flex overflow-hidden">
@@ -56,6 +44,13 @@ export default function EvaluatePage({ params }: PageProps) {
         >
           <div className="max-w-xl w-full mx-auto space-y-6">
             <h2 className="text-xl font-bold tracking-tight text-slate-100">Grading & Score Entry</h2>
+            
+            {/* Dynamic Placeholder Card */}
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+              <span className="text-[10px] text-indigo-400 uppercase tracking-widest font-mono font-bold">Active Dynamic Workspace</span>
+              <div className="text-sm font-semibold text-slate-200">Evaluator Workspace for Paper: {paperId}</div>
+            </div>
+
             <p className="text-sm text-slate-400">
               Complete evaluation fields mapped from the blueprint structure.
             </p>

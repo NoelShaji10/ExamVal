@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import Navbar from '../../../components/Navbar';
 
 export const metadata: Metadata = {
   title: 'Moderator Reconciliation | ExamVal',
@@ -16,22 +17,7 @@ export default function ReconcilePage({ params }: PageProps) {
 
   return (
     <div id="reconciliation-workspace-root" className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <span className="text-xl font-bold tracking-tight text-indigo-400">ExamVal</span>
-          <span className="text-slate-500">/</span>
-          <span className="text-sm font-medium text-slate-400">Moderator Reconciliation</span>
-        </div>
-        <div className="flex items-center space-x-4">
-          <div className="text-right">
-            <p className="text-xs text-slate-400 font-mono">Paper ID: {paperId}</p>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-semibold">
-              Role: Moderator
-            </span>
-          </div>
-        </div>
-      </header>
+      <Navbar currentPaperId={paperId} />
 
       {/* Main Grid Workspace */}
       <main className="flex-1 p-8 max-w-7xl mx-auto w-full space-y-6">
@@ -45,6 +31,12 @@ export default function ReconcilePage({ params }: PageProps) {
               Evaluator Discrepancy Flagged (&ge; 5 points)
             </span>
           </div>
+        </div>
+
+        {/* Dynamic Placeholder Card */}
+        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+          <span className="text-[10px] text-amber-400 uppercase tracking-widest font-mono font-bold">Active Dynamic Workspace</span>
+          <div className="text-sm font-semibold text-slate-200">Moderator Reconciliation Workspace for Paper: {paperId}</div>
         </div>
 
         {/* Matrix Comparison Table */}
