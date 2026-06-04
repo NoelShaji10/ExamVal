@@ -7,13 +7,13 @@ export const metadata: Metadata = {
 };
 
 interface PageProps {
-  params: {
+  params: Promise<{
     paperId: string;
-  };
+  }>;
 }
 
-export default function ReconcilePage({ params }: PageProps) {
-  const { paperId } = params;
+export default async function ReconcilePage({ params }: PageProps) {
+  const { paperId } = await params;
 
   return (
     <div id="reconciliation-workspace-root" className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
