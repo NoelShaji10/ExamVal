@@ -30,6 +30,8 @@ interface ReconciliationSubmissionPayload {
 interface ReconciliationMatrixProps {
   evaluator1Data: QuestionScoreMap;
   evaluator2Data: QuestionScoreMap;
+  evaluator1Notes?: Record<string, string>;
+  evaluator2Notes?: Record<string, string>;
   maxMarksByQuestion?: QuestionMaxMarksMap;
   onSubmitOverride?: (payload: ReconciliationSubmissionPayload) => void;
 }
@@ -141,6 +143,8 @@ function buildInitialSettledScores(
 export const ReconciliationMatrix: React.FC<ReconciliationMatrixProps> = ({
   evaluator1Data,
   evaluator2Data,
+  evaluator1Notes = {},
+  evaluator2Notes = {},
   maxMarksByQuestion = {},
   onSubmitOverride,
 }) => {
@@ -149,17 +153,21 @@ export const ReconciliationMatrix: React.FC<ReconciliationMatrixProps> = ({
     buildInitialSettledScores(evaluator1Data, evaluator2Data),
   );
   const [justification, setJustification] = React.useState('');
+  const [inputErrors, setInputErrors] = React.useState<Record<string, string>>({});
 
   React.useEffect(() => {
     setFinalSettledScores(buildInitialSettledScores(evaluator1Data, evaluator2Data));
   }, [evaluator1Data, evaluator2Data]);
 
   const handleFinalScoreChange = (questionId: string, nextValue: string) => {
+    const maxVal = maxMarksByQuestion[questionId] ?? 9999;
+    
     if (nextValue === '') {
       setFinalSettledScores((currentScores) => ({
         ...currentScores,
         [questionId]: null,
       }));
+      setInputErrors(prev => ({ ...prev, [questionId]: 'Score is required' }));
       return;
     }
 
@@ -168,10 +176,21 @@ export const ReconciliationMatrix: React.FC<ReconciliationMatrixProps> = ({
       return;
     }
 
-    setFinalSettledScores((currentScores) => ({
-      ...currentScores,
-      [questionId]: parsedValue,
-    }));
+    let error = '';
+    if (parsedValue < 0) {
+      error = 'Score cannot be negative';
+    } else if (parsedValue > maxVal) {
+      error = `Cannot exceed maximum marks of ${maxVal}`;
+    }
+
+    setInputErrors(prev => ({ ...prev, [questionId]: error }));
+
+    if (!error) {
+      setFinalSettledScores((currentScores) => ({
+        ...currentScores,
+        [questionId]: parsedValue,
+      }));
+    }
   };
 
   const handleSubmitOverride = () => {
@@ -185,16 +204,16 @@ export const ReconciliationMatrix: React.FC<ReconciliationMatrixProps> = ({
       return;
     }
 
-    // Placeholder until the backend reconciliation action exists.
     console.log('Reconciliation submission payload:', payload);
   };
 
-  const isSubmissionReady = justification.trim().length > 0;
+  const isAllSettled = questionIds.every((qId) => finalSettledScores[qId] !== null && !inputErrors[qId]);
+  const isSubmissionReady = justification.trim().length > 0 && isAllSettled;
 
   return (
     <section className="space-y-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-slate-950/30">
       <div className="flex flex-col gap-2 border-b border-slate-800/80 pb-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-rose-300">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">
           Reconciliation Workspace
         </p>
         <div>
@@ -228,7 +247,7 @@ export const ReconciliationMatrix: React.FC<ReconciliationMatrixProps> = ({
             return (
               <TableRow
                 key={questionId}
-                className={isMismatch ? 'bg-red-950/25 hover:bg-red-950/35' : undefined}
+                className={isMismatch ? 'bg-red-950/20 hover:bg-red-950/30 transition' : undefined}
               >
                 <TableCell className="font-mono font-semibold text-white">
                   {questionId}
@@ -236,11 +255,21 @@ export const ReconciliationMatrix: React.FC<ReconciliationMatrixProps> = ({
                 <TableCell className="font-mono text-slate-300">
                   {maxMarksByQuestion[questionId] ?? '--'}
                 </TableCell>
-                <TableCell className="font-mono text-slate-100">
-                  {evaluator1Score ?? '--'}
+                <TableCell className="text-slate-100">
+                  <span className="font-mono font-bold">{evaluator1Score ?? '--'}</span>
+                  {evaluator1Notes[questionId] && (
+                    <p className="text-xs text-slate-400 italic mt-1 font-sans font-medium">
+                      "{evaluator1Notes[questionId]}"
+                    </p>
+                  )}
                 </TableCell>
-                <TableCell className="font-mono text-slate-100">
-                  {evaluator2Score ?? '--'}
+                <TableCell className="text-slate-100">
+                  <span className="font-mono font-bold">{evaluator2Score ?? '--'}</span>
+                  {evaluator2Notes[questionId] && (
+                    <p className="text-xs text-slate-400 italic mt-1 font-sans font-medium">
+                      "{evaluator2Notes[questionId]}"
+                    </p>
+                  )}
                 </TableCell>
                 <TableCell>
                   <input
@@ -254,15 +283,22 @@ export const ReconciliationMatrix: React.FC<ReconciliationMatrixProps> = ({
                     }
                     placeholder={isMismatch ? 'Enter final score' : 'Settled'}
                     aria-label={`Final settled score for ${questionId}`}
-                    className="w-full max-w-[12rem] rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm font-mono text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    className={`w-full max-w-[12rem] rounded-lg border bg-slate-950 px-3 py-2 text-sm font-mono text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
+                      inputErrors[questionId] ? 'border-rose-500' : 'border-slate-700'
+                    }`}
                   />
+                  {inputErrors[questionId] && (
+                    <p className="text-[10px] text-rose-500 font-semibold mt-1">
+                      {inputErrors[questionId]}
+                    </p>
+                  )}
                 </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
-
+ 
       <div className="space-y-3 border-t border-slate-800/80 pt-6">
         <label
           htmlFor="moderator-justification"
@@ -272,21 +308,21 @@ export const ReconciliationMatrix: React.FC<ReconciliationMatrixProps> = ({
         </label>
         <textarea
           id="moderator-justification"
-          rows={6}
+          rows={4}
           value={justification}
           onChange={(event) => setJustification(event.target.value)}
           placeholder="Explain the rationale behind the final reconciled marks for audit review."
-          className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
         />
         <div className="flex items-center justify-between gap-4">
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-400 font-medium">
             Every override must include a moderator note before the paper can be locked.
           </p>
           <button
             type="button"
             onClick={handleSubmitOverride}
             disabled={!isSubmissionReady}
-            className="inline-flex items-center justify-center rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500"
+            className="inline-flex items-center justify-center rounded-xl bg-amber-500 px-5 py-3 text-xs font-bold text-slate-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500 shadow-md shadow-amber-500/5 cursor-pointer"
           >
             Confirm Override &amp; Lock
           </button>

@@ -2,17 +2,17 @@ import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 
 export interface ExamBlueprint {
-  id: string;
+  id: string | number;
   name: string;
   structure: any; // JSONB structure representing questions
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 export interface PaperDetails {
-  id: string;
-  blueprint_id: string;
-  pdf_url: string;
+  id: string | number;
+  blueprint_id: string | number;
+  pdf_url?: string;
   student_anonymous_id: string;
   status: string;
   final_score: number | null;
