@@ -35,9 +35,7 @@ export default function Navbar({ currentPaperId }: NavbarProps) {
             ExamVal
           </span>
         </div>
-        <span className="text-slate-700">|</span>
         <span className="text-xs uppercase tracking-widest text-slate-500 font-mono font-bold select-none">
-          State Sandbox
         </span>
       </div>
 
@@ -53,16 +51,25 @@ export default function Navbar({ currentPaperId }: NavbarProps) {
 
         {/* Evaluator Identity Switcher (only shown when role is Evaluator) */}
         {role === 'Evaluator' && (
-          <div className="flex items-center space-x-3 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5">
-            <label htmlFor="evaluator-role-select" className="text-xs text-slate-400 font-semibold tracking-wide select-none">
+          <div
+            className={`flex items-center space-x-3 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 transition-all duration-200 ${activePaperId ? 'opacity-60 cursor-not-allowed' : ''
+              }`}
+            title={activePaperId ? 'Cannot change evaluator identity after selecting a paper' : undefined}
+          >
+            <label
+              htmlFor="evaluator-role-select"
+              className={`text-xs font-semibold tracking-wide select-none transition-colors duration-200 ${activePaperId ? 'text-slate-500' : 'text-slate-400'
+                }`}
+            >
               Evaluator Identity:
             </label>
             <div className="relative">
               <select
                 id="evaluator-role-select"
                 value={evaluatorRole}
+                disabled={!!activePaperId}
                 onChange={(e) => setEvaluatorRole(e.target.value as 'EVALUATOR_1' | 'EVALUATOR_2')}
-                className="bg-slate-950 text-xs font-bold text-emerald-400 border border-slate-700 rounded px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer hover:bg-slate-900 transition-colors"
+                className="bg-slate-950 text-xs font-bold text-emerald-400 border border-slate-700 rounded px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer hover:bg-slate-900 transition-colors disabled:cursor-not-allowed disabled:text-slate-500 disabled:border-slate-800"
               >
                 <option value="EVALUATOR_1">Evaluator 1 (E1)</option>
                 <option value="EVALUATOR_2">Evaluator 2 (E2)</option>
@@ -91,11 +98,10 @@ export default function Navbar({ currentPaperId }: NavbarProps) {
 
         {/* Current Active Role Badge */}
         <div className="flex items-center">
-          <span className={`text-xs px-3 py-1.5 rounded-full font-bold tracking-wide border transition-all duration-300 ${
-            role === 'Moderator' 
-              ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.05)]' 
-              : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_12px_rgba(16,185,129,0.05)]'
-          }`}>
+          <span className={`text-xs px-3 py-1.5 rounded-full font-bold tracking-wide border transition-all duration-300 ${role === 'Moderator'
+            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.05)]'
+            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_12px_rgba(16,185,129,0.05)]'
+            }`}>
             {role} View
           </span>
         </div>

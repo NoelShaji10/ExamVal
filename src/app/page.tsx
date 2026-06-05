@@ -21,7 +21,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       <Navbar currentPaperId={null} />
-      
+
       <main className="flex-1 p-8 max-w-6xl mx-auto w-full flex flex-col justify-center space-y-8">
         <div className="text-center space-y-3 max-w-xl mx-auto">
           <h1 className="text-4xl font-extrabold tracking-wider bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -66,7 +66,7 @@ export default function HomePage() {
         )}
 
         <div className="pt-2 text-center text-[10px] text-slate-600 font-mono">
-          State Engine sandbox navbar is enabled. Switch views using "Change View Role".
+
         </div>
       </main>
     </div>
