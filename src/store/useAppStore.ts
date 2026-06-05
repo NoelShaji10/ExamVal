@@ -58,6 +58,16 @@ export interface AppState {
   setActivePaper: (activePaperId: string | null) => void;
 
   /**
+   * The active evaluator identity for sandbox/role testing ('EVALUATOR_1' | 'EVALUATOR_2').
+   */
+  evaluatorRole: 'EVALUATOR_1' | 'EVALUATOR_2';
+
+  /**
+   * Updates the active evaluator identity.
+   */
+  setEvaluatorRole: (evaluatorRole: 'EVALUATOR_1' | 'EVALUATOR_2') => void;
+
+  /**
    * Clears the current active session state, resetting to default values.
    */
   clearSession: () => void;
@@ -70,18 +80,22 @@ export const useAppStore = create<AppState>((set) => ({
   // Core State Properties
   user: null,
   role: 'Evaluator',
+  evaluatorRole: 'EVALUATOR_1',
   activePaperId: null,
 
   // Setter Actions
   setUser: (user) => set(() => ({ user })),
   
   setRole: (role) => set(() => ({ role })),
+
+  setEvaluatorRole: (evaluatorRole) => set(() => ({ evaluatorRole })),
   
   setActivePaper: (activePaperId) => set(() => ({ activePaperId })),
 
   clearSession: () => set(() => ({
     user: null,
     role: 'Evaluator',
+    evaluatorRole: 'EVALUATOR_1',
     activePaperId: null,
   })),
 }));

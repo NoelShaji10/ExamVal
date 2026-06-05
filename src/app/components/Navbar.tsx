@@ -12,7 +12,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ currentPaperId }: NavbarProps) {
-  const { role, activePaperId, setRole, setActivePaper } = useAppStore();
+  const { role, evaluatorRole, activePaperId, setRole, setEvaluatorRole, setActivePaper } = useAppStore();
 
   // Synchronize the page's paper ID context with the global client state
   useEffect(() => {
@@ -48,6 +48,26 @@ export default function Navbar({ currentPaperId }: NavbarProps) {
           <div className="hidden sm:flex items-center space-x-2 bg-indigo-950/40 border border-indigo-900/30 px-3 py-1.5 rounded-lg text-xs font-mono text-indigo-300">
             <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" />
             <span>Active Paper: {activePaperId}</span>
+          </div>
+        )}
+
+        {/* Evaluator Identity Switcher (only shown when role is Evaluator) */}
+        {role === 'Evaluator' && (
+          <div className="flex items-center space-x-3 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5">
+            <label htmlFor="evaluator-role-select" className="text-xs text-slate-400 font-semibold tracking-wide select-none">
+              Evaluator Identity:
+            </label>
+            <div className="relative">
+              <select
+                id="evaluator-role-select"
+                value={evaluatorRole}
+                onChange={(e) => setEvaluatorRole(e.target.value as 'EVALUATOR_1' | 'EVALUATOR_2')}
+                className="bg-slate-950 text-xs font-bold text-emerald-400 border border-slate-700 rounded px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer hover:bg-slate-900 transition-colors"
+              >
+                <option value="EVALUATOR_1">Evaluator 1 (E1)</option>
+                <option value="EVALUATOR_2">Evaluator 2 (E2)</option>
+              </select>
+            </div>
           </div>
         )}
 

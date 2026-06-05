@@ -5,6 +5,7 @@ import { PDFPanel } from './PDFPanel';
 import { GradingForm, ExamBlueprint } from './GradingForm';
 import { useFetchPaperDetails } from '../operations/useFetchPaperDetails';
 import { useFetchEvaluations } from '../operations/useFetchEvaluations';
+import { useAppStore } from '../../store/useAppStore';
 
 interface EvaluationWorkspaceProps {
     paperId: string;
@@ -13,11 +14,13 @@ interface EvaluationWorkspaceProps {
 const mockPdfUrl = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
 
 export const EvaluationWorkspace: React.FC<EvaluationWorkspaceProps> = ({ paperId }) => {
+    const evaluatorRole = useAppStore((state) => state.evaluatorRole);
+    const activeEvaluatorId = evaluatorRole === 'EVALUATOR_2' 
+        ? 'b0e0a9f3-8d2a-4a6c-9411-cf0b5d52c1e2' 
+        : 'a0e0a9f3-8d2a-4a6c-9411-cf0b5d52c1e1';
+
     const { paperData, loading: paperLoading, error: paperError } = useFetchPaperDetails(paperId);
-    const { evaluations, loading: evLoading, error: evError, refetch: refetchEvaluations } = useFetchEvaluations(paperId);
-    
-    // Simulate active evaluator state (default: Evaluator One)
-    const [activeEvaluatorId, setActiveEvaluatorId] = useState<string>('a0e0a9f3-8d2a-4a6c-9411-cf0b5d52c1e1');
+    const { evaluations, loading: evLoading, error: evError, refetch: refetchEvaluations } = useFetchEvaluations(paperId, activeEvaluatorId);
 
     const isLoading = paperLoading || evLoading;
     const error = paperError || evError;
@@ -31,7 +34,7 @@ export const EvaluationWorkspace: React.FC<EvaluationWorkspaceProps> = ({ paperI
         }))
     } : null;
 
-    const existingEvaluation = evaluations.find(e => e.user_id === activeEvaluatorId);
+    const existingEvaluation = evaluations[0];
     const pdfUrl = paperData?.pdf_url || mockPdfUrl;
 
     if (error) {
@@ -91,22 +94,6 @@ export const EvaluationWorkspace: React.FC<EvaluationWorkspaceProps> = ({ paperI
                                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                                 Grading & Evaluation Form
                             </h2>
-                        </div>
-
-                        {/* Simulator Sandbox Selector */}
-                        <div className="mb-6 flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-xs">
-                          <div>
-                            <span className="font-bold text-indigo-900 block">Simulate Evaluator Session</span>
-                            <span className="text-indigo-600/80">Switch users to test double-blind grading block.</span>
-                          </div>
-                          <select 
-                            value={activeEvaluatorId}
-                            onChange={(e) => setActiveEvaluatorId(e.target.value)}
-                            className="bg-white border border-indigo-200 rounded-lg px-3 py-2 text-xs text-indigo-900 font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                          >
-                            <option value="a0e0a9f3-8d2a-4a6c-9411-cf0b5d52c1e1">Evaluator One (E1)</option>
-                            <option value="b0e0a9f3-8d2a-4a6c-9411-cf0b5d52c1e2">Evaluator Two (E2)</option>
-                          </select>
                         </div>
 
                         {/* Interactive Form */}

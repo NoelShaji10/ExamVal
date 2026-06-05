@@ -19,7 +19,7 @@ export interface FetchEvaluationsResult {
   refetch: () => Promise<void>;
 }
 
-export function useFetchEvaluations(paperId: string | number): FetchEvaluationsResult {
+export function useFetchEvaluations(paperId: string | number, userId?: string): FetchEvaluationsResult {
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,11 +32,16 @@ export function useFetchEvaluations(paperId: string | number): FetchEvaluationsR
     setLoading(true);
     setError(null);
     try {
-      const { data, error: dbError } = await supabase
+      let query = supabase
         .from('evaluations')
         .select('*')
-        .eq('paper_id', paperId)
-        .order('created_at', { ascending: true });
+        .eq('paper_id', paperId);
+
+      if (userId) {
+        query = query.eq('user_id', userId);
+      }
+
+      const { data, error: dbError } = await query.order('created_at', { ascending: true });
 
       if (dbError) {
         throw dbError;
@@ -66,7 +71,7 @@ export function useFetchEvaluations(paperId: string | number): FetchEvaluationsR
 
   useEffect(() => {
     fetchEvaluations();
-  }, [paperId]);
+  }, [paperId, userId]);
 
   return { evaluations, loading, error, refetch: fetchEvaluations };
 }
