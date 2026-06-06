@@ -15,60 +15,158 @@ export default function HomePage() {
   const evaluatorPapers = papers.map(p => ({
     id: String(p.id),
     studentAnonymousId: p.student_anonymous_id,
-    status: p.status as 'Pending_E1_E2' | 'Needs_Reconciliation' | 'Completed'
+    status: p.status as 'Pending_E1_E2' | 'Needs_Reconciliation' | 'Completed',
+    createdAt: p.created_at
   }));
 
+  // Metrics calculation
+  const needsReconciliationCount = papers.filter((p) => p.status === 'Needs_Reconciliation').length;
+  const awaitingCount = papers.filter((p) => p.status === 'Pending_E1_E2').length;
+  const completedCount = papers.filter((p) => p.status === 'Completed').length;
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-white text-slate-800 flex flex-col font-sans">
       <Navbar currentPaperId={null} />
 
-      <main className="flex-1 p-8 max-w-6xl mx-auto w-full flex flex-col justify-center space-y-8">
-        <div className="text-center space-y-3 max-w-xl mx-auto">
-          <h1 className="text-4xl font-extrabold tracking-wider bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            ExamVal
-          </h1>
-          <p className="text-slate-400 text-sm">
-            Double-Blind Evaluation & Moderator Reconciliation Portal
-          </p>
+      {role === 'Evaluator' ? (
+        <div className="flex-1 flex overflow-hidden">
+          <EvaluatorQueue papers={evaluatorPapers} />
         </div>
+      ) : (
+        <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-12 flex flex-col bg-white">
+          {error && (
+            <div className="p-4 mb-6 bg-red-50 border border-red-200 rounded-xl text-red-650 text-sm">
+              Error loading dashboard data: {error}
+            </div>
+          )}
 
-        {error && (
-          <div className="p-4 bg-rose-950/20 border border-rose-900/50 rounded-xl text-rose-400 text-sm max-w-xl mx-auto w-full">
-            Error loading workspace: {error}
-          </div>
-        )}
+          <h1 className="text-4xl font-bold text-slate-900 tracking-tight mb-10 select-none">
+            Moderator Hub
+          </h1>
 
-        {loading ? (
-          <div className="py-12 flex justify-center items-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-800 border-t-indigo-500" />
-          </div>
-        ) : role === 'Evaluator' ? (
-          <div className="space-y-6">
-            <EvaluatorQueue papers={evaluatorPapers} />
-          </div>
-        ) : (
-          <div className="max-w-xl w-full mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl space-y-6">
-            <h2 className="text-xl font-bold text-slate-100 border-b border-slate-800 pb-3">Moderator Workspace</h2>
-            <div className="grid grid-cols-1 gap-4 text-left">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+            {/* Left Section: Go to Dashboard card */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm flex flex-col items-center text-center justify-between min-h-[420px] relative overflow-hidden group">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-[#007BFF] opacity-90" />
+
+              <div className="my-6">
+                {/* Large checkmark magnifying glass icon */}
+                <div className="h-28 w-28 rounded-full bg-blue-50/50 border border-blue-100 flex items-center justify-center text-blue-500 shadow-inner">
+                  <svg className="h-14 w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z M9 11l2 2 4-4" />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-8">
+                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                  Moderator Triage Dashboard
+                </h2>
+                <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                  Access the conflict triage queue, view metrics, and manage incoming anomalous papers.
+                </p>
+              </div>
+
               <Link
                 href="/moderator/dashboard"
-                className="flex flex-col p-4 bg-slate-950 hover:bg-slate-850 border border-slate-800 hover:border-amber-500/50 rounded-xl transition duration-250 group animate-fadeIn"
+                className="w-full py-3.5 px-6 bg-[#007BFF] hover:bg-[#0056b3] text-white font-semibold rounded-xl text-center flex items-center justify-center gap-1.5 transition-all shadow-md shadow-blue-500/10 cursor-pointer"
               >
-                <span className="text-sm font-bold text-amber-400 group-hover:text-amber-300">
-                  Moderator Triage Dashboard ➔
-                </span>
-                <span className="text-xs text-slate-500 mt-1">
-                  View the conflict triage queue, metrics, and incoming anomalous papers.
-                </span>
+                Go to Dashboard
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
               </Link>
             </div>
+
+            {/* Right Section: Quick Stats & Recent Activity */}
+            <div className="space-y-8">
+              {/* Quick Stats Grid */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight select-none">
+                  Quick Stats
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-blue-50/30 border border-blue-100/50 rounded-xl p-4 flex flex-col justify-between min-h-[100px]">
+                    <span className="text-xs text-slate-500 font-semibold leading-tight">Needs Reconciliation:</span>
+                    <span className="text-2xl font-bold text-blue-600 block mt-2">
+                      {loading ? '...' : needsReconciliationCount}
+                    </span>
+                  </div>
+
+                  <div className="bg-blue-50/30 border border-blue-100/50 rounded-xl p-4 flex flex-col justify-between min-h-[100px]">
+                    <span className="text-xs text-slate-500 font-semibold leading-tight">Awaiting E1/E2 Grades:</span>
+                    <span className="text-2xl font-bold text-blue-600 block mt-2">
+                      {loading ? '...' : awaitingCount}
+                    </span>
+                  </div>
+
+                  <div className="bg-slate-50/60 border border-slate-200/50 rounded-xl p-4 flex flex-col justify-between min-h-[100px]">
+                    <span className="text-xs text-slate-500 font-semibold leading-tight">Completed Evaluations:</span>
+                    <span className="text-2xl font-bold text-slate-800 block mt-2">
+                      {loading ? '...' : completedCount}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent Activity Timeline */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight select-none">
+                  Recent Activity
+                </h3>
+
+                <div className="border border-slate-200/80 rounded-2xl p-6 bg-white space-y-6">
+                  {/* Timeline Item 1 */}
+                  <div className="flex items-start space-x-4">
+                    <div className="h-8 w-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-500 shrink-0 shadow-sm">
+                      <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold text-slate-800 leading-snug">
+                        Reconciled Q1_a in EXAM-ROLL-1104
+                      </p>
+                      <p className="text-[10px] font-medium text-slate-400 font-mono">30 mins ago</p>
+                    </div>
+                  </div>
+
+                  {/* Timeline Item 2 */}
+                  <div className="flex items-start space-x-4">
+                    <div className="h-8 w-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-500 shrink-0 shadow-sm">
+                      <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                      </svg>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold text-slate-800 leading-snug">
+                        Viewed Discrepancy Matrix for Class XII Math
+                      </p>
+                      <p className="text-[10px] font-medium text-slate-400 font-mono">1 hour ago</p>
+                    </div>
+                  </div>
+
+                  {/* Timeline Item 3 */}
+                  <div className="flex items-start space-x-4">
+                    <div className="h-8 w-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-500 shrink-0 shadow-sm">
+                      <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold text-slate-800 leading-snug">
+                        Marked EXAM-ROLL-1105 as Resolved
+                      </p>
+                      <p className="text-[10px] font-medium text-slate-400 font-mono">3 hours ago</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-
-        <div className="pt-2 text-center text-[10px] text-slate-600 font-mono">
-
-        </div>
-      </main>
+        </main>
+      )}
     </div>
   );
 }

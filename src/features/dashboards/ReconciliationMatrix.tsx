@@ -2,24 +2,7 @@
 
 import * as React from 'react';
 
-interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> {}
-
-interface TableSectionProps
-  extends React.HTMLAttributes<HTMLTableSectionElement> {}
-
-interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {}
-
-interface TableHeadProps
-  extends React.ThHTMLAttributes<HTMLTableCellElement> {}
-
-interface TableCellProps
-  extends React.TdHTMLAttributes<HTMLTableCellElement> {}
-
-interface TableCaptionProps
-  extends React.HTMLAttributes<HTMLTableCaptionElement> {}
-
 type QuestionScoreMap = Record<string, number>;
-
 type QuestionMaxMarksMap = Record<string, number>;
 
 interface ReconciliationSubmissionPayload {
@@ -34,84 +17,6 @@ interface ReconciliationMatrixProps {
   evaluator2Notes?: Record<string, string>;
   maxMarksByQuestion?: QuestionMaxMarksMap;
   onSubmitOverride?: (payload: ReconciliationSubmissionPayload) => void;
-}
-
-function mergeClassNames(...classes: Array<string | undefined>) {
-  return classes.filter(Boolean).join(' ');
-}
-
-function Table({ className, ...props }: TableProps) {
-  return (
-    <div className="relative w-full overflow-x-auto">
-      <table
-        className={mergeClassNames('w-full caption-bottom text-sm', className)}
-        {...props}
-      />
-    </div>
-  );
-}
-
-function TableHeader({ className, ...props }: TableSectionProps) {
-  return (
-    <thead
-      className={mergeClassNames(
-        '[&_tr]:border-b [&_tr]:border-slate-800/80',
-        className,
-      )}
-      {...props}
-    />
-  );
-}
-
-function TableBody({ className, ...props }: TableSectionProps) {
-  return (
-    <tbody
-      className={mergeClassNames('[&_tr:last-child]:border-0', className)}
-      {...props}
-    />
-  );
-}
-
-function TableRow({ className, ...props }: TableRowProps) {
-  return (
-    <tr
-      className={mergeClassNames(
-        'border-b border-slate-800/70 transition-colors hover:bg-slate-900/70',
-        className,
-      )}
-      {...props}
-    />
-  );
-}
-
-function TableHead({ className, ...props }: TableHeadProps) {
-  return (
-    <th
-      className={mergeClassNames(
-        'h-11 px-4 text-left align-middle text-xs font-semibold uppercase tracking-[0.18em] text-slate-400',
-        className,
-      )}
-      {...props}
-    />
-  );
-}
-
-function TableCell({ className, ...props }: TableCellProps) {
-  return (
-    <td
-      className={mergeClassNames('px-4 py-4 align-middle text-slate-200', className)}
-      {...props}
-    />
-  );
-}
-
-function TableCaption({ className, ...props }: TableCaptionProps) {
-  return (
-    <caption
-      className={mergeClassNames('mt-4 text-sm text-slate-500', className)}
-      {...props}
-    />
-  );
 }
 
 function getQuestionIds(
@@ -180,7 +85,7 @@ export const ReconciliationMatrix: React.FC<ReconciliationMatrixProps> = ({
     if (parsedValue < 0) {
       error = 'Score cannot be negative';
     } else if (parsedValue > maxVal) {
-      error = `Cannot exceed maximum marks of ${maxVal}`;
+      error = `Cannot exceed max of ${maxVal}`;
     }
 
     setInputErrors(prev => ({ ...prev, [questionId]: error }));
@@ -201,108 +106,113 @@ export const ReconciliationMatrix: React.FC<ReconciliationMatrixProps> = ({
 
     if (onSubmitOverride) {
       onSubmitOverride(payload);
-      return;
     }
-
-    console.log('Reconciliation submission payload:', payload);
   };
 
   const isAllSettled = questionIds.every((qId) => finalSettledScores[qId] !== null && !inputErrors[qId]);
   const isSubmissionReady = justification.trim().length > 0 && isAllSettled;
 
   return (
-    <section className="space-y-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-slate-950/30">
-      <div className="flex flex-col gap-2 border-b border-slate-800/80 pb-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">
-          Reconciliation Workspace
+    <section className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col space-y-6">
+      <div>
+        <h2 className="text-xl font-bold text-slate-900 tracking-tight select-none">
+          Comparative Discrepancy Matrix
+        </h2>
+        <p className="text-xs text-slate-500 mt-1 select-none">
+          Align question-level marks, highlight disagreements, and lock the final score set.
         </p>
-        <div>
-          <h2 className="text-2xl font-semibold text-white">Comparative Discrepancy Matrix</h2>
-          <p className="text-sm text-slate-400">
-            Align question-level marks, highlight disagreements, and lock the final score set.
-          </p>
-        </div>
       </div>
 
-      <Table>
-        <TableCaption className="sr-only">
-          Side-by-side comparison of evaluator scores for each question.
-        </TableCaption>
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            <TableHead>Question ID</TableHead>
-            <TableHead>Max Marks</TableHead>
-            <TableHead>Evaluator 1 Score</TableHead>
-            <TableHead>Evaluator 2 Score</TableHead>
-            <TableHead>Final Settled Score</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {questionIds.map((questionId) => {
-            const evaluator1Score = evaluator1Data[questionId];
-            const evaluator2Score = evaluator2Data[questionId];
-            const settledScore = finalSettledScores[questionId];
-            const isMismatch = evaluator1Score !== evaluator2Score;
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm text-slate-700">
+          <thead className="bg-slate-50/70 text-slate-400 text-[10px] uppercase tracking-wider font-bold">
+            <tr className="border-b border-slate-200/50">
+              <th className="px-4 py-3">Question ID</th>
+              <th className="px-4 py-3">Max Marks</th>
+              <th className="px-4 py-3">Evaluator 1 Score</th>
+              <th className="px-4 py-3">Evaluator 2 Score</th>
+              <th className="px-4 py-3">Final Settled Score</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 text-slate-700">
+            {questionIds.map((questionId) => {
+              const evaluator1Score = evaluator1Data[questionId];
+              const evaluator2Score = evaluator2Data[questionId];
+              const settledScore = finalSettledScores[questionId];
+              const isMismatch = evaluator1Score !== evaluator2Score;
 
-            return (
-              <TableRow
-                key={questionId}
-                className={isMismatch ? 'bg-red-950/20 hover:bg-red-950/30 transition' : undefined}
-              >
-                <TableCell className="font-mono font-semibold text-white">
-                  {questionId}
-                </TableCell>
-                <TableCell className="font-mono text-slate-300">
-                  {maxMarksByQuestion[questionId] ?? '--'}
-                </TableCell>
-                <TableCell className="text-slate-100">
-                  <span className="font-mono font-bold">{evaluator1Score ?? '--'}</span>
-                  {evaluator1Notes[questionId] && (
-                    <p className="text-xs text-slate-400 italic mt-1 font-sans font-medium">
-                      "{evaluator1Notes[questionId]}"
-                    </p>
-                  )}
-                </TableCell>
-                <TableCell className="text-slate-100">
-                  <span className="font-mono font-bold">{evaluator2Score ?? '--'}</span>
-                  {evaluator2Notes[questionId] && (
-                    <p className="text-xs text-slate-400 italic mt-1 font-sans font-medium">
-                      "{evaluator2Notes[questionId]}"
-                    </p>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <input
-                    type="number"
-                    min={0}
-                    max={maxMarksByQuestion[questionId]}
-                    step={0.5}
-                    value={settledScore ?? ''}
-                    onChange={(event) =>
-                      handleFinalScoreChange(questionId, event.target.value)
-                    }
-                    placeholder={isMismatch ? 'Enter final score' : 'Settled'}
-                    aria-label={`Final settled score for ${questionId}`}
-                    className={`w-full max-w-[12rem] rounded-lg border bg-slate-950 px-3 py-2 text-sm font-mono text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
-                      inputErrors[questionId] ? 'border-rose-500' : 'border-slate-700'
-                    }`}
-                  />
-                  {inputErrors[questionId] && (
-                    <p className="text-[10px] text-rose-500 font-semibold mt-1">
-                      {inputErrors[questionId]}
-                    </p>
-                  )}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
- 
-      <div className="space-y-3 border-t border-slate-800/80 pt-6">
+              const e1Note = evaluator1Notes[questionId];
+              const e2Note = evaluator2Notes[questionId];
+
+              return (
+                <tr
+                  key={questionId}
+                  className={`transition-colors border-b border-slate-100 ${
+                    isMismatch ? 'bg-amber-50/70 hover:bg-amber-100/40' : 'hover:bg-slate-50/30'
+                  }`}
+                >
+                  <td className="px-4 py-4 font-mono font-bold text-slate-900">
+                    {questionId}
+                  </td>
+                  <td className="px-4 py-4 font-mono text-slate-500">
+                    {maxMarksByQuestion[questionId] ?? '--'}
+                  </td>
+                  <td className="px-4 py-4 text-xs">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="font-mono font-bold text-slate-900">{evaluator1Score ?? '--'}</span>
+                      {e1Note && (
+                        <span className="text-slate-500 text-[11px] font-normal leading-none bg-slate-100 border border-slate-200/40 rounded px-1.5 py-0.5 select-none">
+                          {e1Note}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 text-xs">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="font-mono font-bold text-slate-900">{evaluator2Score ?? '--'}</span>
+                      {e2Note && (
+                        <span className="text-slate-500 text-[11px] font-normal leading-none bg-slate-100 border border-slate-200/40 rounded px-1.5 py-0.5 select-none">
+                          {e2Note}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex flex-col">
+                      <input
+                        type="number"
+                        min={0}
+                        max={maxMarksByQuestion[questionId]}
+                        step={0.5}
+                        value={settledScore ?? ''}
+                        onChange={(event) =>
+                          handleFinalScoreChange(questionId, event.target.value)
+                        }
+                        placeholder="Enter"
+                        aria-label={`Final settled score for ${questionId}`}
+                        className={`w-32 rounded-lg border bg-white px-3 py-1.5 text-sm font-mono text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 ${
+                          inputErrors[questionId] ? 'border-red-500 ring-1 ring-red-150' : 'border-slate-350'
+                        }`}
+                      />
+                      {inputErrors[questionId] && (
+                        <p className="text-[10px] text-red-650 font-semibold mt-1">
+                          {inputErrors[questionId]}
+                        </p>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Justification Text Area */}
+      <div className="space-y-3 pt-4 border-t border-slate-100 flex flex-col">
         <label
           htmlFor="moderator-justification"
-          className="block text-sm font-semibold text-slate-200"
+          className="block text-xs font-bold uppercase tracking-wider text-slate-500 select-none"
         >
           Moderator Justification Notes (Required)
         </label>
@@ -311,20 +221,21 @@ export const ReconciliationMatrix: React.FC<ReconciliationMatrixProps> = ({
           rows={4}
           value={justification}
           onChange={(event) => setJustification(event.target.value)}
-          placeholder="Explain the rationale behind the final reconciled marks for audit review."
-          className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+          placeholder="Enter justification for the settled scores..."
+          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 resize-none font-sans"
         />
-        <div className="flex items-center justify-between gap-4">
-          <p className="text-xs text-slate-400 font-medium">
+        
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-2">
+          <p className="text-xs text-slate-400 font-medium select-none">
             Every override must include a moderator note before the paper can be locked.
           </p>
           <button
             type="button"
             onClick={handleSubmitOverride}
             disabled={!isSubmissionReady}
-            className="inline-flex items-center justify-center rounded-xl bg-amber-500 px-5 py-3 text-xs font-bold text-slate-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500 shadow-md shadow-amber-500/5 cursor-pointer"
+            className="px-6 py-2.5 bg-[#0B2545] hover:bg-[#06172B] disabled:bg-slate-200 text-white disabled:text-slate-400 text-xs font-bold rounded-lg transition-all tracking-wide select-none cursor-pointer text-center"
           >
-            Confirm Override &amp; Lock
+            Finalize &amp; Submit
           </button>
         </div>
       </div>
